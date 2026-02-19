@@ -1,24 +1,29 @@
 version: 0.2
 
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
+    REPO_NAME: python-docker-app
+
 phases:
   pre_build:
     commands:
-      - echo Logging in to ECR...
-      - aws --version
+      - echo Logging in to ECR
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+      - IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_NAME
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $IMAGE_URI
 
   build:
     commands:
-      - echo Building Docker image...
-      - docker build -t docker-flask-app .
-      - docker tag docker-flask-app:latest $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/docker-flask-app:latest
+      - echo Building Docker image
+      - docker build -t $REPO_NAME .
+      - docker tag $REPO_NAME:latest $IMAGE_URI:latest
 
   post_build:
     commands:
-      - echo Pushing image...
-      - docker push $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/docker-flask-app:latest
-      - printf '[{"name":"docker-flask-app","imageUri":"%s"}]' $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/docker-flask-app:latest > imagedefinitions.json
+      - echo Pushing image
+      - docker push $IMAGE_URI:latest
+      - printf '[{"name":"docker-flask-app","imageUri":"%s"}]' $IMAGE_URI:latest > imagedefinitions.json
 
 artifacts:
   files:
