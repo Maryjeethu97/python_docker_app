@@ -23,7 +23,7 @@ phases:
     commands:
       - echo Pushing image
       - docker push $IMAGE_URI:latest
-      - printf '[{"name":"docker-flask-app","imageUri":"%s"}]' $IMAGE_URI:latest > imagedefinitions.json
+      - printf '[{"name":"python-docker-app","imageUri":"%s"}]' $IMAGE_URI:latest > imagedefinitions.json
 
 artifacts:
   files:
